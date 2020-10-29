@@ -1,0 +1,4 @@
+name = Sample Module
+description = Module to make a form filed required and display message on form submission.
+core = 7.x
+package = Other

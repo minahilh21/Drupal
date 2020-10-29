@@ -1,0 +1,33 @@
+<?php
+/*
+* Implement hook_schema()
+*/
+function sample_schema() {
+ $schema['sample'] = array(
+  'descritption' => t('Stores information'),
+  'fields' => array (
+    'id' => array(
+      'description' => 'The primary identifier for the record.',
+      'type' => 'serial',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+    ),
+    'uid' => array (
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+      'description' => t('User Id '),
+    ),
+    
+    'email' => array (
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'description' => t('User Email'),
+    ),
+  ),
+  'primary key' => array('id'),
+);
+ return $schema;
+}

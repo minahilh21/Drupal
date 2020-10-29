@@ -1,0 +1,91 @@
+<?php
+/**
+*  Implements hook_form_alter
+* makes the subject field of comment form required
+*/
+function sample_form_alter(&$form, &$form_state, $form_id) {
+  if($form_id=='comment_node_article_form'){
+   $form['subject']['#required'] = TRUE;
+   array_unshift($form['#submit'], 'sample_submission_alter_function');
+ }
+}
+function sample_submission_alter_function($form, &$form_state)
+{
+  drupal_set_message(t('Message by submission alter function :D'));
+}
+function sample_menu() {
+  $items = array();
+  $items['sample_form'] = array(
+    'title' => 'Sample Form', 
+    'description' => 'Sample form to get email from User',
+    'page callback' => 'drupal_get_form', 
+    'page arguments' => array('sample_form'),
+    'access arguments' => array('View sample form'),
+  );
+  return $items;
+}
+//function to add menu link in main navigation
+function sample_menu_alter(&$items) {
+  $items['sample_form']['menu_name'] = 'main-menu';
+}
+//function to create form
+function sample_form($form, &$form_state) {
+  $form=array();
+  $form['ajax_markup'] = array(
+    '#type' => 'markup',
+    '#prefix' => '<div id="show_ajax_message_div">',
+    '#suffix' => '</div>',
+    '#markup' => '',
+  );
+  $form['email'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Enter Your Email:',
+    '#size' => 50,
+    '#maxlength' => 50,
+    '#required' => TRUE,
+  );
+  $form['submit_button'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit!'),
+    '#ajax' => array(
+      'callback' => 'sample_form_submit',
+      'wrapper' => 'show_ajax_message_div',
+      'method' => 'html',
+      'effect' => 'fade',
+    ),
+  );
+  return $form;
+}
+function sample_form_submit($form, &$form_state){
+  global $user;
+  if($form_state['form_has_errors'] ==TRUE){
+    return '';
+  }
+  else{
+   $email = $form_state['values']['email'];
+   $result = db_insert('sample')
+   ->fields(array(
+            'email' => $form_state['values']['email'],
+            'uid' => $user->uid))
+   ->execute();
+   return 'Response Recorded';
+ }
+}
+function sample_form_validate($form, &$form_state) {
+  if (!filter_var($form_state['values']['email'], FILTER_VALIDATE_EMAIL))
+  {
+   form_set_error('email', t('Enter a valid Email address')); 
+   $form_state['form_has_errors'] = TRUE;
+ }
+}
+/**
+* Impements hook_permission()
+*/
+function sample_permission() {
+  return array(
+    'View sample form'=>array(
+      'title'=>t('View sample form'),
+      'description'=>t('submit an email address via sample form'),
+    )
+  );
+}
